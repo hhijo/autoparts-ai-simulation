@@ -1,0 +1,104 @@
+{
+  "meta": { "instanceId": "AutoParts-Simulation-001" },
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [380, 240]
+    },
+    {
+      "id": "2",
+      "name": "Quality Control Agent",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [660, 240],
+      "parameters": {
+        "operation": "chat",
+        "model": "gpt-4o-mini",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are the Quality Control Agent for AutoParts Inc. Your task is to analyze component sensor readings and detect possible defects. You must return a JSON object with: defect_probability (0-1), defect_type, recommended_action."
+          },
+          {
+            "role": "user",
+            "content": "Analyze this component: {{ $json }}"
+          }
+        ],
+        "responseFormat": "json"
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "__REPLACE_WITH_YOUR_OPENAI_CREDENTIAL_ID__"
+        }
+      }
+    },
+    {
+      "id": "3",
+      "name": "Predictive Maintenance Agent",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [960, 240],
+      "parameters": {
+        "operation": "chat",
+        "model": "gpt-4o-mini",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are the Predictive Maintenance Agent. Assess machine failure risk and return JSON with: failure_risk, predicted_hours_to_failure, recommended_maintenance."
+          },
+          {
+            "role": "user",
+            "content": "Machine analysis input: {{ $json }}"
+          }
+        ],
+        "responseFormat": "json"
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "__REPLACE_WITH_YOUR_OPENAI_CREDENTIAL_ID__"
+        }
+      }
+    },
+    {
+      "id": "4",
+      "name": "Scheduling Optimization Agent",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [1280, 240],
+      "parameters": {
+        "operation": "chat",
+        "model": "gpt-4o-mini",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are the Production Scheduling Optimization Agent. Merge quality + maintenance insights and produce optimized scheduling JSON."
+          },
+          {
+            "role": "user",
+            "content": "Scheduling input: {{ $json }}"
+          }
+        ],
+        "responseFormat": "json"
+      },
+      "credentials": {
+        "openAiApi": {
+          "id": "__REPLACE_WITH_YOUR_OPENAI_CREDENTIAL_ID__"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [[{ "node": "Quality Control Agent", "type": "main", "index": 0 }]]
+    },
+    "Quality Control Agent": {
+      "main": [[{ "node": "Predictive Maintenance Agent", "type": "main", "index": 0 }]]
+    },
+    "Predictive Maintenance Agent": {
+      "main": [[{ "node": "Scheduling Optimization Agent", "type": "main", "index": 0 }]]
+    }
+  }
+}
